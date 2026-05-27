@@ -1,0 +1,41 @@
+# Python (POC implementation + sample validation tooling)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.python-version
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Environment + secrets — keep .env.example committed, never the populated file
+.env
+.env.*
+!.env.example
+
+# UiPath Studio local caches (BPMN exports go to artifacts/ committed; local caches stay out)
+.uipath/
+*.suo
+*.user
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+out/
+
+# Logs
+*.log

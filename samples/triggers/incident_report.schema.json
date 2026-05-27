@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/forenly-ai-systems/uipath-maestro-ecm/blob/main/samples/triggers/incident_report.schema.json",
+  "title": "IncidentReport",
+  "description": "Canonical shape consumed by Container 1 (Problem Report). Every trigger source — vision API, ERP event, manual portal, supplier deviation report — normalizes its input to this shape before entering the BPMN. The Analyst agent, IRB Action Center HITL, and downstream containers all read this object.",
+  "type": "object",
+  "required": ["incidentId", "source", "occurredAt", "severity", "subject", "description"],
+  "additionalProperties": false,
+  "properties": {
+    "incidentId": {
+      "type": "string",
+      "description": "Stable identifier assigned by the trigger adapter. Format: `IR-{YYYYMMDD}-{seq}` recommended.",
+      "pattern": "^IR-[0-9]{8}-[0-9]{4,}$",
+      "examples": ["IR-20260520-0001"]
+    },
+    "source": {
+      "type": "object",
+      "description": "Where the incident originated.",
+      "required": ["type", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["vision", "erp", "manual", "supplier"],
+          "description": "Trigger source category. Determines which adapter normalized the input."
+        },
+        "name": {
+          "type": "string",
+          "description": "Specific provider/system name (e.g., `aoi-vision`, `sap-erp`, `qa-web-portal`, `supplier-acme-erp`).",
+          "examples": ["aoi-vision", "sap-erp-prod", "qa-portal", "acme-supplier-erp"]
+        },
+        "detectorConfidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "When applicable (vision, automated detectors), the source's confidence score. Used by the Risk Agent's Fast Track gateway. Omit or set to 1.0 for manual/deterministic sources."
+        }
+      }
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp when the underlying event occurred (not when the trigger fired the BPMN)."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "low", "medium", "high", "critical"],
+      "description": "Initial severity tag from the trigger source. The Risk Agent may revise this in Container 3."
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200,
+      "description": "Short human-readable headline (e.g., `NG_WIRING: misrouted cable, panel A-12`)."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Free-form details supplied by the source. May include error codes, observed measurements, comparison to spec, attached evidence URIs."
+    },
+    "affectedItems": {
+      "type": "array",
+      "description": "BOM-level items implicated by the incident. Drives supplier impact analysis in Container 4.",
+      "items": {
+        "type": "object",
+        "required": ["itemId", "itemType"],
+        "additionalProperties": false,
+        "properties": {
+          "itemId": {
+            "type": "string",
+            "description": "PLM part number, BOM line, or supplier catalog number.",
+            "examples": ["PRT-4521-Rev-C", "BOM-A12.cable.7"]
+          },
+          "itemType": {
+            "type": "string",
+            "enum": ["part", "assembly", "bom-line", "configuration-item"]
+          },
+          "supplierId": {
+            "type": "string",
+            "description": "Optional supplier identifier; populated when an item is sourced externally.",
+            "examples": ["sup-acme-001", "sup-bosch-emea-217"]
+          },
+          "quantity": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Affected quantity or count of units in the affected lot."
+          }
+        }
+      }
+    },
+    "complianceClass": {
+      "type": "string",
+      "enum": ["none", "as9100", "iso10007", "iso13485", "gmp", "iatf-16949", "other"],
+      "description": "Regulated-industry compliance class of the affected items. Drives the Risk Agent (high compliance class biases toward Full Track / CRB HITL)."
+    },
+    "evidence": {
+      "type": "array",
+      "description": "Supporting evidence URIs (defect images, ERP screenshots, supplier deviation PDFs).",
+      "items": {
+        "type": "object",
+        "required": ["kind", "uri"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["image", "pdf", "log", "report", "video", "other"]
+          },
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Cloud storage or content-addressable URI to the evidence artifact."
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
+    },
+    "reportedBy": {
+      "type": "object",
+      "description": "Human or system that filed the incident (the `Requestor` role in the framework).",
+      "required": ["principalType", "principalId"],
+      "additionalProperties": false,
+      "properties": {
+        "principalType": {
+          "type": "string",
+          "enum": ["human", "service-account", "automated-detector"]
+        },
+        "principalId": {
+          "type": "string",
+          "description": "User ID, service account name, or detector instance ID."
+        },
+        "displayName": {
+          "type": "string"
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "description": "Free-form tags used by the Analyst agent for clustering related incidents.",
+      "items": { "type": "string" },
+      "examples": [["wiring", "panel-A", "shift-2"]]
+    },
+    "vendor": {
+      "type": "object",
+      "description": "Trigger-source-specific raw payload, preserved verbatim for audit. Adapters MUST NOT mutate; downstream agents may consult.",
+      "additionalProperties": true
+    }
+  }
+}
