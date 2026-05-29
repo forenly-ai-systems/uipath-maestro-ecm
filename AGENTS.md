@@ -6,10 +6,10 @@
 
 ## Project
 
-An open-source framework that runs **Engineering Change Management (ECM)** as an agentic,
+An open-source framework that runs **Physical AI & Autonomous Robotics Field Inspection** as an agentic,
 human-in-the-loop workflow on **UiPath Maestro BPMN**. The framework defines 3 processes,
-8 containers, and 9 roles. AI agents handle pre-analysis (the Analyst role is an LLM agent, the
-Fast Track decision is an autonomous Risk Agent, board briefings are AI-rendered); humans approve
+8 containers, and 9 roles. AI agents handle pre-analysis (the Vision AI Analyst role is an LLM agent, the
+Fast Track decision is an autonomous Safety Risk Agent, board briefings are AI-rendered); humans approve
 at the review-board gates via Action Center.
 
 ## Stack and constraints
@@ -19,9 +19,9 @@ at the review-board gates via Action Center.
 | Orchestration core | UiPath Maestro BPMN (mandatory) |
 | Agent runtime | UiPath Agent Builder (Maestro-callable); LangChain wrappers permitted for external agents called from BPMN task nodes |
 | LLM | Claude (primary), Gemini (fallback) |
-| Trigger sources | AOI vision system · ERP (SAP-shaped) · Manual portal · Supplier deviation feed — see `samples/triggers/` |
-| PLM target (mock) | Lightweight FastAPI mock approximating an Aras Innovator–shaped REST API |
-| Supplier targets (mock) | One API-driven endpoint + one RPA-driven legacy UI |
+| Trigger sources | Mobile patrol robot · Fixed sensors · Manual operator app · Supplier deviation feed — see `samples/triggers/` |
+| CMMS target (mock) | Lightweight FastAPI mock approximating an IBM Maximo / ServiceNow–shaped REST API |
+| Execution targets (mock)| One API-driven repair robot endpoint + one RPA-driven legacy maintenance UI |
 
 ## Repository layout
 
@@ -53,7 +53,7 @@ uipath-maestro-ecm/
 
 1. **Read `samples/triggers/incident_report.schema.json` first.** Every trigger normalizes to this shape; all BPMN inputs and agent inputs consume it.
 2. **Read `docs/ARCHITECTURE.md` second.** The UiPath-component breakdown (Agent Builder, Maestro, API Workflows, Action Center, RPA) is defined there. Use those components — do not substitute external tools where a UiPath component fits.
-3. **Default scope:** Container 1 (Problem Report) only, unless the prompt explicitly asks for a different container. Do not invent containers, roles, or dispositions beyond those defined in the architecture.
+3. **Default scope:** Container 1 (Problem Report / Anomaly Intake) only, unless the prompt explicitly asks for a different container. Do not invent containers, roles, or dispositions beyond those defined in the architecture.
 4. **Output location:** write generated UiPath artifacts under `artifacts/container1/`. Do not write to `docs/` or `samples/` unless explicitly told.
 5. **Reproducibility rule:** every artifact must be deterministic from the prompt + repo content. Do not bake in secrets, hard-coded tenant URLs, or absolute file paths.
 6. **Commit messages:** use the prefix `bpmn:`, `agents:`, `actioncenter:`, or `artifacts(container1):`. Reference the issue number when relevant.
@@ -63,14 +63,12 @@ uipath-maestro-ecm/
 
 | Acronym | Expansion |
 |---|---|
-| **ECM** | Engineering Change Management (not Enterprise Content Management) |
-| **ECR** | Engineering Change Request |
-| **ECN** | Engineering Change Notice |
-| **IRB / CRB / TRB / CIB** | Incident / Change / Technical / Implementation Review Boards |
-| **Fast Track** | Bypassing CRB for low-impact changes; here implemented as an agentic Risk Agent gateway |
+| **CMMS** | Computerized Maintenance Management System |
+| **CAB** | Change Advisory Board (Safety & Operations review) |
+| **CIB** | Change Implementation Board (Executive-level director approvals) |
+| **Fast Track** | Bypassing CAB for low-impact repairs; here implemented as an agentic Safety Risk Agent gateway |
 | **HITL** | Human-in-the-Loop, realized via UiPath Action Center tasks |
 | **BPMN** | Business Process Model and Notation 2.0 |
-| **PLM** | Product Lifecycle Management |
 | **AOI** | Automated Optical Inspection (vision-based defect detection) |
 
 ## What this file is NOT

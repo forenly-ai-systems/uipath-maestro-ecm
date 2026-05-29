@@ -1,87 +1,80 @@
-# uipath-maestro-ecm — Agentic Engineering Change Management on UiPath Maestro
+# uipath-maestro-ecm — Agentic Physical AI & Robotics Field Inspection on UiPath Maestro
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-> An open-source framework for running **Engineering Change Management (ECM)** as an
-> **agentic, human-in-the-loop workflow** on **UiPath Maestro BPMN**.
+> An open-source framework for running **Physical AI & Autonomous Robotics Field Inspection** as an **agentic, human-in-the-loop (HITL) orchestration** on **UiPath Maestro BPMN**.
 
-Engineering changes in regulated industries (aerospace, medical, automotive, pharma) are detected
-in seconds but resolved in days. This project orchestrates the full ECM lifecycle — from the moment
-a defect or deviation is detected to the audited release — as a BPMN process where AI agents do the
-pre-analysis and humans approve at the decisions that matter.
+In industrial fields (aerospace, manufacturing, energy, construction), physical defects and equipment anomalies must be detected in seconds and remediated systematically. This project orchestrates the full inspection and remediation lifecycle — from the moment a mobile patrol robot flags an anomaly to the compliance-audited release of repair actions — as a BPMN process where AI agents perform pre-analysis and humans approve critical safety and cost gates.
 
 ## What it does
 
-- **8 process containers** modelling the ECM lifecycle (problem report → change analysis → implementation → quality control) as Maestro BPMN subprocesses.
-- **9 roles** as BPMN swimlanes — some realized as LLM agents (e.g. the Analyst), others as human review boards via Action Center HITL.
-- **An agentic "Fast Track" gateway** — a Risk Agent scores each change request and routes low-risk, reversible changes around the full review board automatically.
-- **Vendor-agnostic triggers** — vision/AOI inspection, ERP events, a manual portal, or supplier deviation feeds all normalize to one canonical `IncidentReport` shape.
-- **Audit-grade traceability** — immutable log entries at every gateway and task.
+- **8 process containers** modeling the full field-inspection and remediation lifecycle (inspection trigger → anomaly analysis → planning → automated execution & auditing) as Maestro BPMN subprocesses.
+- **9 roles** structured as BPMN swimlanes — some realized as autonomous LLM agents (e.g., the Vision AI Analyst, Safety Risk Agent), others as human-in-the-loop review boards via UiPath Action Center.
+- **An agentic "Fast Track" gateway** — a Safety Risk Agent automatically scores incoming anomalies and bypasses the full operations board for low-risk, minor repairs.
+- **Vendor-agnostic triggers** — mobile patrol robots, fixed sensor feeds, handheld operator portals, or camera feeds all normalize to one canonical `IncidentReport` shape.
+- **Audit-grade traceability** — immutable log entries at every gateway and task node for regulatory compliance.
 
 ## Architecture at a glance
 
 ```
                 ╔══════════════════════════════════════════╗
                 ║   UiPath Maestro BPMN (core)             ║
-                ║   • 8 ECM containers as subprocesses      ║
-                ║   • 9 roles as swimlanes / agents         ║
-                ║   • Action Center HITL (board approvals)  ║
-                ║   • Agentic Fast Track gateway            ║
-                ║   • Immutable audit log                   ║
+                ║   • 8 Robotics Containers as Subprocesses║
+                ║   • 9 Roles as Swimlanes / Agents        ║
+                ║   • Action Center HITL (board approvals) ║
+                ║   • Agentic Fast Track gateway           ║
+                ║   • Immutable audit compliance log       ║
                 ╚══════════════════════════════════════════╝
                           ↑ task nodes invoke ↓
    ┌──────────────┬──────────────┬──────────────┬──────────────┐
-   │ Trigger      │ LLM Agents   │ PLM /        │ Supplier     │
-   │ source       │ (swappable)  │ Enterprise   │ Systems      │
+   │ Trigger      │ LLM Agents   │ Enterprise / │ Execution    │
+   │ Source       │ (swappable)  │ Maintenance  │ Systems      │
    │ (swappable)  │              │ (swappable)  │ (swappable)  │
    ├──────────────┼──────────────┼──────────────┼──────────────┤
-   │ AOI vision   │ Claude /     │ PLM mock     │ Supplier     │
-   │ ERP event    │ Gemini via   │ (Aras /      │ ERP / PLM    │
-   │ Manual form  │ LangChain    │ Windchill-   │ via API or   │
-   │ Deviation    │              │ shaped)      │ RPA Robot    │
+   │ Mobile Robot │ Claude /     │ Mock AssetDB │ Repair Robot │
+   │ Fixed Sensor │ Gemini via   │ (ServiceNow /│ — or —       │
+   │ Operator App │ LangChain    │ Maximo-      │ RPA-driven   │
+   │ Cam Feed     │              │ shaped API)  │ Legacy UI    │
    └──────────────┴──────────────┴──────────────┴──────────────┘
 ```
 
 Full architecture: [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md).
 
-## The 8 ECM containers
+## The 8 Robotics Containers
 
 ```
-Process 1 · Change Trigger
-  1. Problem Report        Requestor → Analyst agent → IRB HITL → disposition (5-way)
-  2. Customer Requirement  Customer-raised path + IRB feedback loop
+Process 1 · Inspection & Defect Intake
+  1. Anomaly Report        Mobile Robot → Vision AI Analyst → Inspector HITL → disposition (5-way)
+  2. Manual Intervention   Field operator or fixed sensor flags deviation + Inspector feedback loop
 
-Process 2 · Change Solution
-  3. Change Analysis       ECR review → Risk Agent → Fast Track OR CRB HITL
-  4. Supplier Business     CRB analyzes cost / hours / lead time / effectivity
-     Analysis
+Process 2 · Analysis & Safety Routing
+  3. Risk & Safety Analysis Defect Request → Safety Risk Agent → Fast Track OR CAB (Change Advisory Board) HITL
+  4. Site Impact Analysis   Operations Board analyzes cost / downtime / labor hours / effectivity of repair
 
-Process 3 · Change Implementation
-  5. Plan Change Implement Analyst + Change Specialist draft ECN → CIB HITL
-  6. Release Change        Product data released; downstream systems notified
-  7. Supplier Change       RPA Robot / API Workflows write to supplier systems
-     Implementation
-  8. Quality Control       Audit-summary agent + immutable log + signature
+Process 3 · Action & Compliance
+  5. Remediation Plan      Analyst Agent + Maintenance Specialist draft Playbook → CIB (CISO/Operations) HITL
+  6. Release Repair Action Product/Asset data released; dispatch mobile repair robot or field engineer
+  7. Legacy Configuration  RPA Security Robot / API Workflows write to subcontractor or legacy CMMS systems
+  8. Quality Assurance     Compliance-summary agent + immutable audit log + supervisor signature
 ```
 
 ## How it's built
 
 | Layer | Choice |
-|---|---|
+| --- | --- |
 | **Orchestration** | UiPath Automation Cloud + Maestro BPMN |
 | **UiPath components** | Agent Builder · Maestro BPMN · API Workflows · Action Center · RPA Robot |
 | **External agent framework** | LangChain (Analyst agent, Risk Agent, audit-summary agent) |
 | **LLM** | Claude (primary) + Gemini (fallback) |
-| **Trigger demo source** | AOI (automated optical inspection) vision system; interchangeable |
-| **PLM target (mocked)** | Open-source PLM-style mock service (Aras Innovator–shaped API) |
-| **Supplier targets (mocked)** | Two mock endpoints — one API-driven, one RPA-driven |
+| **Trigger demo source** | Mobile patrol robot & vision system; interchangeable |
+| **Asset CMMS target (mocked)**| Open-source Asset Management mock service (Maximo/ServiceNow–shaped API) |
+| **Execution targets (mocked)** | Two mock endpoints — one API-driven (repair robot), one RPA-driven (legacy database) |
 
 ## Getting started
 
-The orchestration layer runs on **UiPath Automation Cloud** (Maestro BPMN is the mandatory core).
-External frameworks (LangChain, custom Python agents) are welcome **as task nodes invoked from the BPMN flow**.
+The orchestration core runs on **UiPath Automation Cloud** (Maestro BPMN is the mandatory core). External frameworks (LangChain, custom Python agents) are welcome **as task nodes invoked from the BPMN flow**.
 
-You can explore and validate the canonical data model locally without any UiPath access:
+You can explore and validate the canonical robotics data model locally without any UiPath access:
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -98,7 +91,7 @@ for f in glob.glob('samples/triggers/*.json'):
 PY
 ```
 
-See [`samples/triggers/`](./samples/triggers/) for the `IncidentReport` schema + 4 source samples (vision / ERP / manual / supplier) that let you replay the flow without external systems.
+See [`samples/triggers/`](./samples/triggers/) for the `IncidentReport` schema + 4 robotics source samples (vision / ERP / manual / supplier) that let you replay the flow without external systems.
 
 ## Contributing
 
